@@ -1,3 +1,6 @@
+import sys
+import importlib
+
 # embedder.py
 
 import chromadb
@@ -29,10 +32,13 @@ def add_chunks_to_db(chunks, source_file=None):
         return
 
     # Ensure unique and safe IDs
-    ids = [
-        f"{source_file.replace('\\', '/')}::{i+1}" if source_file else str(uuid4())
-        for i in range(len(chunks))
-    ]
+    ids = []
+    for i in range(len(chunks)):
+        if source_file:
+            safe_path = source_file.replace('\\', '/')
+            ids.append(f"{safe_path}::{i+1}")
+        else:
+            ids.append(str(uuid4()))
 
     # Metadata helps in filtering/debugging later
     metadatas = [
