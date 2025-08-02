@@ -11,8 +11,14 @@ from uuid import uuid4
 # Define the embedding model name
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Initialize ChromaDB client with persistent storage
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+# Initialize ChromaDB client with in-memory storage for cloud compatibility
+try:
+    # Try persistent client first (for local development)
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+except:
+    # Fallback to in-memory client (for cloud deployment)
+    chroma_client = chromadb.Client()
+    
 collection = chroma_client.get_or_create_collection(name="code_docs")
 
 # Load embedding model once

@@ -15,8 +15,13 @@ load_dotenv()
 # Load same model as used for embedding
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Load vector DB with persistent storage
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+# Load vector DB with in-memory storage for cloud compatibility
+try:
+    # Try persistent client first (for local development)
+    chroma_client = chromadb.PersistentClient(path="./chroma_db")
+except:
+    # Fallback to in-memory client (for cloud deployment)
+    chroma_client = chromadb.Client()
 
 def get_collection():
     """Get the current collection, creating it if it doesn't exist"""
