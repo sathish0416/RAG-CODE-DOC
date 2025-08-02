@@ -18,6 +18,63 @@ A powerful Retrieval-Augmented Generation (RAG) system that can analyze any GitH
 
 **[Deploy on Streamlit Cloud](https://share.streamlit.io/)**
 
+## 📋 Summary of Approach
+
+### **RAG (Retrieval-Augmented Generation) Architecture:**
+
+1. **Repository Processing:**
+   - Clone GitHub repositories using GitPython
+   - Extract and process code files, documentation, and configuration files
+   - Implement intelligent chunking to break down large files into meaningful segments
+
+2. **Vector Embeddings:**
+   - Use SentenceTransformers (all-MiniLM-L6-v2) for generating embeddings
+   - Store embeddings in FAISS vector database for efficient similarity search
+   - Maintain metadata for source attribution
+
+3. **Question Answering:**
+   - Convert user questions to embeddings
+   - Retrieve most relevant code chunks using similarity search
+   - Generate contextual answers using Google Gemini AI
+   - Provide source attribution for transparency
+
+4. **Web Interface:**
+   - Streamlit-based user interface for easy interaction
+   - Real-time processing and response generation
+   - Support for multiple repository analysis
+
+### **Key Technical Decisions:**
+- **FAISS over ChromaDB:** Chose FAISS for better cloud compatibility and performance
+- **SentenceTransformers:** Selected for efficient, high-quality embeddings
+- **Google Gemini:** Used for intelligent, context-aware answer generation
+- **Streamlit:** Chosen for rapid development and deployment
+
+## 🔍 Assumptions Made
+
+1. **Repository Access:**
+   - Assumes public GitHub repositories (no authentication required)
+   - Assumes repositories contain readable code files (not binary files)
+
+2. **File Types:**
+   - Focuses on common code file extensions (.py, .js, .html, .css, .md, etc.)
+   - Assumes text-based configuration files
+
+3. **API Limitations:**
+   - Assumes Google Gemini API key is available and has sufficient quota
+   - Assumes reasonable API response times
+
+4. **Performance:**
+   - Assumes repositories are of reasonable size (< 100MB)
+   - Assumes single-user concurrent access (can be scaled)
+
+5. **Data Persistence:**
+   - Assumes in-memory storage is sufficient (data cleared on restart)
+   - Assumes users will re-upload repositories as needed
+
+6. **User Behavior:**
+   - Assumes users will provide clear, specific questions
+   - Assumes users understand basic repository structure
+
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.8+
