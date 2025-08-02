@@ -14,6 +14,8 @@ A powerful Retrieval-Augmented Generation (RAG) system that can analyze any GitH
 
 ## 🚀 Live Demo
 
+**🌐 [Try the Live App](https://rag-code-doc-dbqfdgx5bgwsfbvcfyzvwj.streamlit.app)**
+
 **[Deploy on Streamlit Cloud](https://share.streamlit.io/)**
 
 ## 🛠️ Tech Stack
