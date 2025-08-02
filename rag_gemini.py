@@ -2,9 +2,7 @@ import sys
 import importlib
 import streamlit as st
 
-from sentence_transformers import SentenceTransformer
-import chromadb
-from chromadb.config import Settings
+from vector_store import vector_store
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -12,48 +10,15 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Load same model as used for embedding
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
-
-# Load vector DB with in-memory storage for cloud compatibility
-try:
-    # Try persistent client first (for local development)
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-except:
-    # Fallback to in-memory client (for cloud deployment)
-    chroma_client = chromadb.Client()
-
-def get_collection():
-    """Get the current collection, creating it if it doesn't exist"""
-    try:
-        return chroma_client.get_collection("code_docs")
-    except:
-        return chroma_client.create_collection("code_docs")
-
-collection = get_collection()
-
 # Set up Gemini API
 api_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", "AIzaSyDj4RwfNCLuDPZpqaG6tWfhtdrtdHSVn10"))
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 def retrieve_relevant_chunks(query, top_k=5):
-    """Retrieve relevant chunks from ChromaDB"""
-    # Get fresh collection reference
-    current_collection = get_collection()
-    
-    query_embedding = embedder.encode(query).tolist()
-
+    """Retrieve relevant chunks from FAISS vector store"""
     try:
-        results = current_collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            include=["documents", "metadatas"]
-        )
-
-        documents = results["documents"][0]
-        metadatas = results["metadatas"][0]
-        
+        documents, metadatas = vector_store.search(query, top_k)
         print(f"[DEBUG] Retrieved {len(documents)} documents")
         
         if not documents:

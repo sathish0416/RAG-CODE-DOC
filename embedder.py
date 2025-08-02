@@ -3,30 +3,15 @@ import importlib
 
 # embedder.py
 
-import chromadb
-from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
+from vector_store import vector_store
 from uuid import uuid4
 
 # Define the embedding model name
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Initialize ChromaDB client with in-memory storage for cloud compatibility
-try:
-    # Try persistent client first (for local development)
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-except:
-    # Fallback to in-memory client (for cloud deployment)
-    chroma_client = chromadb.Client()
-    
-collection = chroma_client.get_or_create_collection(name="code_docs")
-
-# Load embedding model once
-embedder = SentenceTransformer(EMBEDDING_MODEL)
-
 def add_chunks_to_db(chunks, source_file=None):
     """
-    Adds a list of text chunks to the ChromaDB vector store.
+    Adds a list of text chunks to the FAISS vector store.
 
     Args:
         chunks (List[str]): The list of text chunks.
@@ -37,58 +22,21 @@ def add_chunks_to_db(chunks, source_file=None):
         print(f"[WARNING] No chunks to embed for file: {source_file}")
         return
 
-    # Ensure unique and safe IDs
-    ids = []
-    for i in range(len(chunks)):
-        if source_file:
-            safe_path = source_file.replace('\\', '/')
-            ids.append(f"{safe_path}::{i+1}")
-        else:
-            ids.append(str(uuid4()))
-
     # Metadata helps in filtering/debugging later
     metadatas = [
-        {"file": source_file.replace('\\', '/'), "chunk_number": i + 1}
+        {"file": source_file.replace('\\', '/') if source_file else "unknown", "chunk_number": i + 1}
         for i in range(len(chunks))
     ]
 
     try:
-        # Generate vector embeddings
-        embeddings = embedder.encode(chunks, show_progress_bar=True).tolist()
-
-        # Get fresh collection reference
-        current_collection = get_fresh_collection()
-
-        # Add to ChromaDB
-        current_collection.add(
-            documents=chunks,
-            embeddings=embeddings,
-            ids=ids,
-            metadatas=metadatas
-        )
-
-        print(f"[INFO] Stored {len(chunks)} chunks from {source_file or 'unknown source'} into ChromaDB.")
+        # Add to FAISS vector store
+        vector_store.add_documents(chunks, metadatas)
+        print(f"[INFO] Stored {len(chunks)} chunks from {source_file or 'unknown source'} into FAISS vector store.")
 
     except Exception as e:
         print(f"[ERROR] Failed to store chunks for {source_file}: {e}")
 
-def get_fresh_collection():
-    """Get a fresh reference to the collection"""
-    try:
-        return chroma_client.get_collection("code_docs")
-    except:
-        return chroma_client.create_collection("code_docs")
-
 def clear_database():
-    """Clear all data from ChromaDB collection"""
-    try:
-        # Delete the collection
-        chroma_client.delete_collection("code_docs")
-        print("[INFO] Deleted existing collection")
-    except:
-        pass
-    
-    # Recreate the collection
-    global collection
-    collection = chroma_client.create_collection("code_docs")
-    print("[INFO] Created fresh collection")
+    """Clear all data from FAISS vector store"""
+    vector_store.clear()
+    print("[INFO] Cleared FAISS vector store")
