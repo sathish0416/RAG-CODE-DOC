@@ -1,6 +1,6 @@
-gitpython
-chromadb
-sentence-transformers
-google-generativeai
-streamlit
-python-dotenv
+gitpython==3.1.40
+chromadb==0.4.18
+sentence-transformers==2.2.2
+google-generativeai==0.3.2
+streamlit==1.28.1
+python-dotenv==1.0.0
