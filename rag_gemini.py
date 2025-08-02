@@ -1,5 +1,6 @@
 import sys
 import importlib
+import streamlit as st
 
 from sentence_transformers import SentenceTransformer
 import chromadb
@@ -27,7 +28,7 @@ def get_collection():
 collection = get_collection()
 
 # Set up Gemini API
-api_key = os.getenv("GEMINI_API_KEY", "AIzaSyDj4RwfNCLuDPZpqaG6tWfhtdrtdHSVn10")
+api_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", "AIzaSyDj4RwfNCLuDPZpqaG6tWfhtdrtdHSVn10"))
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
